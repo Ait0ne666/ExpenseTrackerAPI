@@ -32,6 +32,5 @@ func ConnectDatabase() (*gorm.DB, error) {
 	db.AutoMigrate(&models.Category{}, &models.Expense{})
 
 	DB = db
-
 	return db, nil
 }
