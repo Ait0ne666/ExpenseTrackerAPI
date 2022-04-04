@@ -15,6 +15,7 @@ type ExpensesHandlers interface {
 	GetDayTotalExpenses(ctx *gin.Context)
 	GetMonthExpenses(ctx *gin.Context)
 	GetMonthExpensesByCategory(ctx *gin.Context)
+	GetCategoryList(ctx *gin.Context)
 }
 
 type Handlers struct {

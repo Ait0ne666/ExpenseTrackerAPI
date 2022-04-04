@@ -15,6 +15,7 @@ type ExpensesService interface {
 	GetDayTotalExpenses(date time.Time) (*models.DayTotalResulDTO, error)
 	GetMonthExpenses(dto *models.MonthDTO) (*models.MonthExpensesDTO, error)
 	GetMonthExpensesByCategory(date time.Time) (*models.MonthExpensesByCategoryDTO, error)
+	GetCategoryList(query string) (*[]models.Category, error)
 }
 
 type Service struct {

@@ -17,6 +17,7 @@ type ExpensesDAO interface {
 	GetMonthTotalExpenses(dto *models.MonthDTO) (*float64, error)
 	GetMonthExpenses(dto *models.MonthDTO) ([]models.Expense, error)
 	GetMonthExpensesByCategory(date time.Time) ([]models.MonthCategory, error)
+	GetCategoryList(query string) (*[]models.Category, error)
 }
 
 type Repository struct {

@@ -61,6 +61,20 @@ func (h *ExpensesHandlers) DeleteCategory(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, deleted)
 }
 
+func (h *ExpensesHandlers) GetCategoryList(ctx *gin.Context) {
+
+	query := ctx.Query("query")
+
+	list, err := h.s.GetCategoryList(query)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, infrastruct.ErrorInternalServerError)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, list)
+}
+
 func (h *ExpensesHandlers) DeleteExpense(ctx *gin.Context) {
 
 	id := ctx.Param("id")

@@ -42,6 +42,18 @@ func (s *ExpensesService) DeleteCategory(id string) (*string, error) {
 
 }
 
+func (s *ExpensesService) GetCategoryList(query string) (*[]models.Category, error) {
+
+	list, err := s.db.GetCategoryList(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return list, nil
+
+}
+
 func (s *ExpensesService) DeleteExpense(id string) (*string, error) {
 
 	err := s.db.DeleteExpense(id)

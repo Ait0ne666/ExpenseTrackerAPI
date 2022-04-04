@@ -53,6 +53,18 @@ func (p *ExpensesDAO) DeleteCategory(id string) error {
 
 }
 
+func (p *ExpensesDAO) GetCategoryList(query string) (*[]models.Category, error) {
+
+	categoryList := make([]models.Category, 0)
+
+	if err := p.db.Table("categories").Where("title LIKE ?", "%"+query+"%").Find(&categoryList).Error; err != nil {
+		return nil, err
+	}
+
+	return &categoryList, nil
+
+}
+
 func (p *ExpensesDAO) UpsertExpense(expense *models.Expense) error {
 
 	if expense.ID == "" {

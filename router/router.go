@@ -19,6 +19,7 @@ func NewRouter(engine *gin.Engine, handlers *handlers.Handlers) Router {
 func (r *Router) SetupRouter() {
 
 	r.engine.POST("/category", r.handlers.CreateCategory)
+	r.engine.GET("/categories", r.handlers.GetCategoryList)
 	r.engine.DELETE("/category/:id", r.handlers.DeleteCategory)
 	r.engine.POST("/expense", r.handlers.CreateExpense)
 	r.engine.DELETE("/expense/:id", r.handlers.DeleteExpense)
