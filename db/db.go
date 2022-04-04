@@ -20,7 +20,7 @@ func ConnectDatabase() (*gorm.DB, error) {
 
 	dsn := "host=localhost user=postgres password=fibonachi0%0 dbname=gorm port=5432 sslmode=disable"
 	if retrieved_name && retrieved_host && retrieved_pass && retrieved_user {
-		dsn = fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable password=%s", host, user, name, pass)
+		dsn = fmt.Sprintf("host=%s user=%s dbname=%s sslmode=require password=%s", host, user, name, pass)
 	}
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
