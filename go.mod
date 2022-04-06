@@ -5,6 +5,9 @@ go 1.17
 require gorm.io/gorm v1.23.1
 
 require (
+	github.com/appleboy/gin-jwt/v2 v2.8.0 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
+	github.com/golang-jwt/jwt/v4 v4.2.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.10.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect

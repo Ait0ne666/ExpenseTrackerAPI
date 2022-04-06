@@ -2,6 +2,9 @@ package handlers
 
 import (
 	expenses_handlers "expense_tracker/handlers/expenses"
+
+	middleware "expense_tracker/handlers/middlewares"
+	"expense_tracker/pkg/jwt_auth"
 	"expense_tracker/services"
 
 	"github.com/gin-gonic/gin"
@@ -18,12 +21,18 @@ type ExpensesHandlers interface {
 	GetCategoryList(ctx *gin.Context)
 }
 
-type Handlers struct {
-	ExpensesHandlers
+type Middlewares interface {
+	AuthGuard() gin.HandlerFunc
 }
 
-func NewHandlers(s *services.Service) *Handlers {
+type Handlers struct {
+	ExpensesHandlers
+	Middlewares
+}
+
+func NewHandlers(s *services.Service, jwt *jwt_auth.JwtAuth) *Handlers {
 	return &Handlers{
 		ExpensesHandlers: expenses_handlers.NewExpensesHandlers(s),
+		Middlewares:      middleware.NewMiddlewares(jwt),
 	}
 }
