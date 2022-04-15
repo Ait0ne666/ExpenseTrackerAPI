@@ -179,6 +179,7 @@ func (s *ExpensesService) GetMonthExpenses(dto *models.MonthDTO) (*models.MonthE
 			monthTotal = monthTotal + expenseAmount
 
 			expenses[i].Amount = expenseAmount
+			expenses[i].Currency = currency
 		}
 
 	}
