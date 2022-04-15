@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"expense_tracker/handlers/auth"
 	expenses_handlers "expense_tracker/handlers/expenses"
 
 	middleware "expense_tracker/handlers/middlewares"
@@ -26,14 +27,20 @@ type Middlewares interface {
 	AuthGuard() gin.HandlerFunc
 }
 
+type AuthHandlers interface {
+	Login(ctx *gin.Context)
+}
+
 type Handlers struct {
 	ExpensesHandlers
 	Middlewares
+	AuthHandlers
 }
 
 func NewHandlers(s *services.Service, jwt *jwt_auth.JwtAuth) *Handlers {
 	return &Handlers{
 		ExpensesHandlers: expenses_handlers.NewExpensesHandlers(s.ExpensesService),
-		Middlewares:      middleware.NewMiddlewares(jwt),
+		AuthHandlers:     auth.NewAuthHandlers(s.AuthService),
+		Middlewares:      middleware.NewMiddlewares(jwt, s.AuthService),
 	}
 }

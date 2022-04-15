@@ -22,9 +22,9 @@ func NewExpensesService(
 	}
 }
 
-func (s *ExpensesService) CreateCategory(title string) (*models.Category, error) {
+func (s *ExpensesService) CreateCategory(title string, userID string) (*models.Category, error) {
 
-	category, err := s.db.CreateCategory(title)
+	category, err := s.db.CreateCategory(title, userID)
 
 	if err != nil {
 		return nil, err
@@ -34,9 +34,9 @@ func (s *ExpensesService) CreateCategory(title string) (*models.Category, error)
 
 }
 
-func (s *ExpensesService) DeleteCategory(id string) (*string, error) {
+func (s *ExpensesService) DeleteCategory(id string, userID string) (*string, error) {
 
-	err := s.db.DeleteCategory(id)
+	err := s.db.DeleteCategory(id, userID)
 
 	if err != nil {
 		return nil, err
@@ -46,9 +46,9 @@ func (s *ExpensesService) DeleteCategory(id string) (*string, error) {
 
 }
 
-func (s *ExpensesService) GetCategoryList(query string) (*[]models.Category, error) {
+func (s *ExpensesService) GetCategoryList(query string, userID string) (*[]models.Category, error) {
 
-	list, err := s.db.GetCategoryList(query)
+	list, err := s.db.GetCategoryList(query, userID)
 
 	if err != nil {
 		return nil, err
@@ -58,9 +58,9 @@ func (s *ExpensesService) GetCategoryList(query string) (*[]models.Category, err
 
 }
 
-func (s *ExpensesService) DeleteExpense(id string) (*string, error) {
+func (s *ExpensesService) DeleteExpense(id string, userID string) (*string, error) {
 
-	err := s.db.DeleteExpense(id)
+	err := s.db.DeleteExpense(id, userID)
 
 	if err != nil {
 		return nil, err
@@ -70,13 +70,13 @@ func (s *ExpensesService) DeleteExpense(id string) (*string, error) {
 
 }
 
-func (s *ExpensesService) CreateExpense(dto models.ExpenseDTO) (*models.Expense, error) {
+func (s *ExpensesService) CreateExpense(dto models.ExpenseDTO, userID string) (*models.Expense, error) {
 
 	expense := models.Expense{}
 
 	if dto.CategoryID == nil {
 
-		category, err := s.db.CreateCategory(dto.CategoryName)
+		category, err := s.db.CreateCategory(dto.CategoryName, userID)
 
 		if err != nil {
 			return nil, err
@@ -94,7 +94,7 @@ func (s *ExpensesService) CreateExpense(dto models.ExpenseDTO) (*models.Expense,
 	expense.Title = dto.Title
 	expense.Amount = dto.Amount
 
-	err := s.db.UpsertExpense(&expense)
+	err := s.db.UpsertExpense(&expense, userID)
 
 	if err != nil {
 		return nil, err
@@ -104,7 +104,7 @@ func (s *ExpensesService) CreateExpense(dto models.ExpenseDTO) (*models.Expense,
 
 }
 
-func (s *ExpensesService) GetDayTotalExpenses(date time.Time, currency models.Currency) (*models.DayTotalResulDTO, error) {
+func (s *ExpensesService) GetDayTotalExpenses(date time.Time, currency models.Currency, userID string) (*models.DayTotalResulDTO, error) {
 
 	rates, err := s.common.GetCurrencyRate()
 
@@ -112,13 +112,13 @@ func (s *ExpensesService) GetDayTotalExpenses(date time.Time, currency models.Cu
 		return nil, err
 	}
 
-	dayExpenses, err := s.db.GetDayExpenses(date)
+	dayExpenses, err := s.db.GetDayExpenses(date, userID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	monthExpense, err := s.db.GetMonthExpenses(&models.MonthDTO{Date: date})
+	monthExpense, err := s.db.GetMonthExpenses(&models.MonthDTO{Date: date}, userID)
 
 	if err != nil {
 		return nil, err
@@ -153,7 +153,7 @@ func (s *ExpensesService) GetDayTotalExpenses(date time.Time, currency models.Cu
 
 }
 
-func (s *ExpensesService) GetMonthExpenses(dto *models.MonthDTO) (*models.MonthExpensesDTO, error) {
+func (s *ExpensesService) GetMonthExpenses(dto *models.MonthDTO, userID string) (*models.MonthExpensesDTO, error) {
 	rates, err := s.common.GetCurrencyRate()
 
 	if err != nil {
@@ -162,7 +162,7 @@ func (s *ExpensesService) GetMonthExpenses(dto *models.MonthDTO) (*models.MonthE
 
 	currency := dto.Currency
 
-	expenses, err := s.db.GetMonthExpenses(dto)
+	expenses, err := s.db.GetMonthExpenses(dto, userID)
 
 	if err != nil {
 		return nil, err
@@ -190,7 +190,7 @@ func (s *ExpensesService) GetMonthExpenses(dto *models.MonthDTO) (*models.MonthE
 
 }
 
-func (s *ExpensesService) GetMonthExpensesByCategory(date time.Time, currency models.Currency) (*models.MonthExpensesByCategoryDTO, error) {
+func (s *ExpensesService) GetMonthExpensesByCategory(date time.Time, currency models.Currency, userID string) (*models.MonthExpensesByCategoryDTO, error) {
 
 	rates, err := s.common.GetCurrencyRate()
 
@@ -200,7 +200,7 @@ func (s *ExpensesService) GetMonthExpensesByCategory(date time.Time, currency mo
 
 	categories := make(map[string]models.MonthCategory)
 
-	expenses, err := s.db.GetMonthExpenses(&models.MonthDTO{Date: date})
+	expenses, err := s.db.GetMonthExpenses(&models.MonthDTO{Date: date}, userID)
 
 	if err != nil {
 		return nil, err

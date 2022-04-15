@@ -26,13 +26,15 @@ type CreateCategoryDTO struct {
 
 func (h *ExpensesHandlers) CreateCategory(ctx *gin.Context) {
 
+	userID := ctx.GetString("user")
+
 	var dto CreateCategoryDTO
 	if err := ctx.ShouldBindJSON(&dto); err != nil {
 		ctx.JSON(http.StatusBadRequest, infrastruct.ErrorBadRequest)
 		return
 	}
 
-	category, err := h.s.CreateCategory(dto.Title)
+	category, err := h.s.CreateCategory(dto.Title, userID)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, infrastruct.ErrorInternalServerError)
@@ -44,6 +46,7 @@ func (h *ExpensesHandlers) CreateCategory(ctx *gin.Context) {
 
 func (h *ExpensesHandlers) DeleteCategory(ctx *gin.Context) {
 
+	userID := ctx.GetString("user")
 	id := ctx.Param("id")
 
 	if id == "" {
@@ -51,7 +54,7 @@ func (h *ExpensesHandlers) DeleteCategory(ctx *gin.Context) {
 		return
 	}
 
-	deleted, err := h.s.DeleteCategory(id)
+	deleted, err := h.s.DeleteCategory(id, userID)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, infrastruct.ErrorInternalServerError)
@@ -62,10 +65,10 @@ func (h *ExpensesHandlers) DeleteCategory(ctx *gin.Context) {
 }
 
 func (h *ExpensesHandlers) GetCategoryList(ctx *gin.Context) {
-
+	userID := ctx.GetString("user")
 	query := ctx.Query("query")
 
-	list, err := h.s.GetCategoryList(query)
+	list, err := h.s.GetCategoryList(query, userID)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, infrastruct.ErrorInternalServerError)
@@ -76,7 +79,7 @@ func (h *ExpensesHandlers) GetCategoryList(ctx *gin.Context) {
 }
 
 func (h *ExpensesHandlers) DeleteExpense(ctx *gin.Context) {
-
+	userID := ctx.GetString("user")
 	id := ctx.Param("id")
 
 	if id == "" {
@@ -84,7 +87,7 @@ func (h *ExpensesHandlers) DeleteExpense(ctx *gin.Context) {
 		return
 	}
 
-	deleted, err := h.s.DeleteExpense(id)
+	deleted, err := h.s.DeleteExpense(id, userID)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, infrastruct.ErrorInternalServerError)
@@ -95,7 +98,7 @@ func (h *ExpensesHandlers) DeleteExpense(ctx *gin.Context) {
 }
 
 func (h *ExpensesHandlers) CreateExpense(ctx *gin.Context) {
-
+	userID := ctx.GetString("user")
 	var dto models.ExpenseDTO
 	if err := ctx.ShouldBindJSON(&dto); err != nil {
 		ctx.JSON(http.StatusBadRequest, infrastruct.ErrorBadRequest)
@@ -112,7 +115,7 @@ func (h *ExpensesHandlers) CreateExpense(ctx *gin.Context) {
 		return
 	}
 
-	category, err := h.s.CreateExpense(dto)
+	category, err := h.s.CreateExpense(dto, userID)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, infrastruct.ErrorInternalServerError)
@@ -128,7 +131,7 @@ type DayTotalDTO struct {
 }
 
 func (h *ExpensesHandlers) GetDayTotalExpenses(ctx *gin.Context) {
-
+	userID := ctx.GetString("user")
 	var dto DayTotalDTO
 	if err := ctx.ShouldBindJSON(&dto); err != nil {
 		ctx.JSON(http.StatusBadRequest, infrastruct.ErrorBadRequest)
@@ -140,7 +143,7 @@ func (h *ExpensesHandlers) GetDayTotalExpenses(ctx *gin.Context) {
 		return
 	}
 
-	result, err := h.s.GetDayTotalExpenses(dto.Date, dto.Currency)
+	result, err := h.s.GetDayTotalExpenses(dto.Date, dto.Currency, userID)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, infrastruct.ErrorInternalServerError)
@@ -151,7 +154,7 @@ func (h *ExpensesHandlers) GetDayTotalExpenses(ctx *gin.Context) {
 }
 
 func (h *ExpensesHandlers) GetMonthExpenses(ctx *gin.Context) {
-
+	userID := ctx.GetString("user")
 	var dto models.MonthDTO
 	if err := ctx.ShouldBindJSON(&dto); err != nil {
 		ctx.JSON(http.StatusBadRequest, infrastruct.ErrorBadRequest)
@@ -163,7 +166,7 @@ func (h *ExpensesHandlers) GetMonthExpenses(ctx *gin.Context) {
 		return
 	}
 
-	result, err := h.s.GetMonthExpenses(&dto)
+	result, err := h.s.GetMonthExpenses(&dto, userID)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, infrastruct.ErrorInternalServerError)
@@ -174,7 +177,7 @@ func (h *ExpensesHandlers) GetMonthExpenses(ctx *gin.Context) {
 }
 
 func (h *ExpensesHandlers) GetMonthExpensesByCategory(ctx *gin.Context) {
-
+	userID := ctx.GetString("user")
 	var dto DayTotalDTO
 	if err := ctx.ShouldBindJSON(&dto); err != nil {
 		ctx.JSON(http.StatusBadRequest, infrastruct.ErrorBadRequest)
@@ -186,7 +189,7 @@ func (h *ExpensesHandlers) GetMonthExpensesByCategory(ctx *gin.Context) {
 		return
 	}
 
-	result, err := h.s.GetMonthExpensesByCategory(dto.Date, dto.Currency)
+	result, err := h.s.GetMonthExpensesByCategory(dto.Date, dto.Currency, userID)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, infrastruct.ErrorInternalServerError)

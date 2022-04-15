@@ -12,8 +12,9 @@ const (
 )
 
 type Category struct {
-	ID    string `json:"id" gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
-	Title string `json:"title" gorm:"title;uniqueIndex"`
+	ID     string `json:"id" gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
+	Title  string `json:"title" gorm:"title;"`
+	UserID string `json:"user_id" gorm:"user_id;default:be9e19d1-7150-4a6d-85f0-1cee1c3ac7bc"`
 }
 
 type Expense struct {
@@ -24,6 +25,7 @@ type Expense struct {
 	Amount     float64   `json:"amount" gorm:"amount"`
 	CategoryID string    `json:"category_id" gorm:"category_id"`
 	Currency   Currency  `json:"currency" gorm:"currency;default:tbh"`
+	UserID     string    `json:"user_id" gorm:"user_id;default:be9e19d1-7150-4a6d-85f0-1cee1c3ac7bc"`
 }
 
 type ExpenseDTO struct {
@@ -70,4 +72,16 @@ type CurrencyRate struct {
 	EUR  float64   `json:"eur" gorm:"eur"`
 	USD  float64   `json:"usd" gorm:"usd"`
 	TBH  float64   `json:"tbh" gorm:"tbh"`
+}
+
+type User struct {
+	ID       string `json:"id" gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
+	Active   string `json:"active" gorm:"active;default:true"`
+	Login    string `json:"login" gorm:"login"`
+	Password string `json:"password" gorm:"password"`
+}
+
+type LoginDTO struct {
+	Login    string `json:"login"`
+	Password string `json:"password"`
 }

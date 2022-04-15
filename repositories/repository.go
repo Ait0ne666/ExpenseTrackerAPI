@@ -2,6 +2,7 @@ package repository
 
 import (
 	"expense_tracker/models"
+	"expense_tracker/repositories/auth"
 	"expense_tracker/repositories/common"
 	"expense_tracker/repositories/expenses"
 	"time"
@@ -10,16 +11,16 @@ import (
 )
 
 type ExpensesDAO interface {
-	CreateCategory(title string) (*models.Category, error)
-	DeleteCategory(id string) error
-	UpsertExpense(expense *models.Expense) error
-	DeleteExpense(id string) error
-	GetDayTotalExpenses(date time.Time) (*float64, error)
-	GetMonthTotalExpenses(dto *models.MonthDTO) (*float64, error)
-	GetMonthExpenses(dto *models.MonthDTO) ([]models.Expense, error)
-	GetMonthExpensesByCategory(date time.Time) ([]models.MonthCategory, error)
-	GetCategoryList(query string) (*[]models.Category, error)
-	GetDayExpenses(date time.Time) ([]models.Expense, error)
+	CreateCategory(title string, userID string) (*models.Category, error)
+	DeleteCategory(id string, userID string) error
+	UpsertExpense(expense *models.Expense, userID string) error
+	DeleteExpense(id string, userID string) error
+	GetDayTotalExpenses(date time.Time, userID string) (*float64, error)
+	GetMonthTotalExpenses(dto *models.MonthDTO, userID string) (*float64, error)
+	GetMonthExpenses(dto *models.MonthDTO, userID string) ([]models.Expense, error)
+	GetMonthExpensesByCategory(date time.Time, userID string) ([]models.MonthCategory, error)
+	GetCategoryList(query string, userID string) (*[]models.Category, error)
+	GetDayExpenses(date time.Time, userID string) ([]models.Expense, error)
 }
 
 type CommonDAO interface {
@@ -27,14 +28,21 @@ type CommonDAO interface {
 	GetCurrencyRate(date time.Time) (*models.CurrencyRate, error)
 }
 
+type AuthDAO interface {
+	GetUserByLogin(login string) (*models.User, error)
+	GetUserById(id string) (*models.User, error)
+}
+
 type Repository struct {
 	ExpensesDAO
 	CommonDAO
+	AuthDAO
 }
 
 func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{
 		ExpensesDAO: expenses.NewExpensesDAO(db),
 		CommonDAO:   common.NewCommonDAO(db),
+		AuthDAO:     auth.NewAuthDAO(db),
 	}
 }

@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	// initEnv()
+	initEnv()
 	r := gin.Default()
 
 	database, err := db.ConnectDatabase()
@@ -24,13 +24,8 @@ func main() {
 
 	repo := repository.NewRepository(database)
 
-	service := services.NewService(repo)
-
 	jwt := jwt_auth.NewJwtAuth()
-
-	token, err := jwt.GenerateJWT("123")
-
-	println(token)
+	service := services.NewService(repo, jwt)
 
 	handles := handlers.NewHandlers(service, jwt)
 
