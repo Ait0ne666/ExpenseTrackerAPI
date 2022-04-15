@@ -115,6 +115,23 @@ func (p *ExpensesDAO) GetDayTotalExpenses(date time.Time) (*float64, error) {
 
 }
 
+func (p *ExpensesDAO) GetDayExpenses(date time.Time) ([]models.Expense, error) {
+
+	start := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
+	end := start.AddDate(0, 0, 1)
+
+	expenses := make([]models.Expense, 0)
+
+	if err := p.db.Debug().Table("expenses").Preload("Category").Where("date >= ? AND date <= ?", start, end).Order("date Desc").Find(&expenses).Error; err != nil {
+
+		return nil, err
+
+	}
+
+	return expenses, nil
+
+}
+
 func (p *ExpensesDAO) GetMonthTotalExpenses(dto *models.MonthDTO) (*float64, error) {
 	date := dto.Date
 	category := dto.CategoryID

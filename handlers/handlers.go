@@ -19,6 +19,7 @@ type ExpensesHandlers interface {
 	GetMonthExpenses(ctx *gin.Context)
 	GetMonthExpensesByCategory(ctx *gin.Context)
 	GetCategoryList(ctx *gin.Context)
+	GetCurrencyRate(ctx *gin.Context)
 }
 
 type Middlewares interface {
@@ -32,7 +33,7 @@ type Handlers struct {
 
 func NewHandlers(s *services.Service, jwt *jwt_auth.JwtAuth) *Handlers {
 	return &Handlers{
-		ExpensesHandlers: expenses_handlers.NewExpensesHandlers(s),
+		ExpensesHandlers: expenses_handlers.NewExpensesHandlers(s.ExpensesService),
 		Middlewares:      middleware.NewMiddlewares(jwt),
 	}
 }

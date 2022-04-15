@@ -26,4 +26,5 @@ func (r *Router) SetupRouter() {
 	r.engine.POST("/expenses/day", r.handlers.GetDayTotalExpenses)
 	r.engine.POST("/expenses/month", r.handlers.GetMonthExpenses)
 	r.engine.POST("/expenses/category", r.handlers.GetMonthExpensesByCategory)
+	r.engine.GET("/rates", r.handlers.GetCurrencyRate)
 }

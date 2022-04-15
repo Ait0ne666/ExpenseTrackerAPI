@@ -9,9 +9,11 @@ import (
 	"expense_tracker/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	// initEnv()
 	r := gin.Default()
 
 	database, err := db.ConnectDatabase()
@@ -37,4 +39,10 @@ func main() {
 	router.SetupRouter()
 	r.Run()
 
+}
+
+func initEnv() {
+	if err := godotenv.Load("../.env"); err != nil {
+		panic("No .env file found")
+	}
 }

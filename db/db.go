@@ -29,7 +29,7 @@ func ConnectDatabase() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(&models.Category{}, &models.Expense{})
+	db.AutoMigrate(&models.Category{}, &models.Expense{}, &models.CurrencyRate{})
 
 	DB = db
 	return db, nil

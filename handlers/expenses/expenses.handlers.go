@@ -107,6 +107,11 @@ func (h *ExpensesHandlers) CreateExpense(ctx *gin.Context) {
 		return
 	}
 
+	if !(dto.Currency == models.USD || dto.Currency == models.EUR || dto.Currency == models.RUB || dto.Currency == models.TBH) {
+		ctx.JSON(http.StatusBadRequest, infrastruct.ErrorBadRequest)
+		return
+	}
+
 	category, err := h.s.CreateExpense(dto)
 
 	if err != nil {
@@ -118,7 +123,8 @@ func (h *ExpensesHandlers) CreateExpense(ctx *gin.Context) {
 }
 
 type DayTotalDTO struct {
-	Date time.Time `json:"date"`
+	Date     time.Time       `json:"date"`
+	Currency models.Currency `json:"currency"`
 }
 
 func (h *ExpensesHandlers) GetDayTotalExpenses(ctx *gin.Context) {
@@ -129,7 +135,12 @@ func (h *ExpensesHandlers) GetDayTotalExpenses(ctx *gin.Context) {
 		return
 	}
 
-	result, err := h.s.GetDayTotalExpenses(dto.Date)
+	if !(dto.Currency == models.USD || dto.Currency == models.EUR || dto.Currency == models.RUB || dto.Currency == models.TBH) {
+		ctx.JSON(http.StatusBadRequest, infrastruct.ErrorBadRequest)
+		return
+	}
+
+	result, err := h.s.GetDayTotalExpenses(dto.Date, dto.Currency)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, infrastruct.ErrorInternalServerError)
@@ -143,6 +154,11 @@ func (h *ExpensesHandlers) GetMonthExpenses(ctx *gin.Context) {
 
 	var dto models.MonthDTO
 	if err := ctx.ShouldBindJSON(&dto); err != nil {
+		ctx.JSON(http.StatusBadRequest, infrastruct.ErrorBadRequest)
+		return
+	}
+
+	if !(dto.Currency == models.USD || dto.Currency == models.EUR || dto.Currency == models.RUB || dto.Currency == models.TBH) {
 		ctx.JSON(http.StatusBadRequest, infrastruct.ErrorBadRequest)
 		return
 	}
@@ -165,7 +181,24 @@ func (h *ExpensesHandlers) GetMonthExpensesByCategory(ctx *gin.Context) {
 		return
 	}
 
-	result, err := h.s.GetMonthExpensesByCategory(dto.Date)
+	if !(dto.Currency == models.USD || dto.Currency == models.EUR || dto.Currency == models.RUB || dto.Currency == models.TBH) {
+		ctx.JSON(http.StatusBadRequest, infrastruct.ErrorBadRequest)
+		return
+	}
+
+	result, err := h.s.GetMonthExpensesByCategory(dto.Date, dto.Currency)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, infrastruct.ErrorInternalServerError)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, *result)
+}
+
+func (h *ExpensesHandlers) GetCurrencyRate(ctx *gin.Context) {
+
+	result, err := h.s.GetCurrencyRate()
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, infrastruct.ErrorInternalServerError)

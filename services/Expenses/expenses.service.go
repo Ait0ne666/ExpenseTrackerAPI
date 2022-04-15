@@ -3,18 +3,22 @@ package expenses
 import (
 	"expense_tracker/models"
 	repository "expense_tracker/repositories"
+	common "expense_tracker/services/Common"
 	"time"
 )
 
 type ExpensesService struct {
-	db repository.ExpensesDAO
+	db     repository.ExpensesDAO
+	common common.CommonService
 }
 
 func NewExpensesService(
 	db repository.ExpensesDAO,
+	common *common.CommonService,
 ) *ExpensesService {
 	return &ExpensesService{
-		db: db,
+		db:     db,
+		common: *common,
 	}
 }
 
@@ -100,60 +104,181 @@ func (s *ExpensesService) CreateExpense(dto models.ExpenseDTO) (*models.Expense,
 
 }
 
-func (s *ExpensesService) GetDayTotalExpenses(date time.Time) (*models.DayTotalResulDTO, error) {
+func (s *ExpensesService) GetDayTotalExpenses(date time.Time, currency models.Currency) (*models.DayTotalResulDTO, error) {
 
-	total, err := s.db.GetDayTotalExpenses(date)
-
-	if err != nil {
-		return nil, err
-	}
-
-	monthTotal, err := s.db.GetMonthTotalExpenses(&models.MonthDTO{Date: date})
+	rates, err := s.common.GetCurrencyRate()
 
 	if err != nil {
 		return nil, err
 	}
 
-	result := models.DayTotalResulDTO{DayTotal: *total, MonthTotal: *monthTotal}
+	dayExpenses, err := s.db.GetDayExpenses(date)
+
+	if err != nil {
+		return nil, err
+	}
+
+	monthExpense, err := s.db.GetMonthExpenses(&models.MonthDTO{Date: date})
+
+	if err != nil {
+		return nil, err
+	}
+
+	var dayTotal float64 = 0
+	var monthTotal float64 = 0
+
+	for _, exp := range dayExpenses {
+
+		if exp.Currency == currency {
+			dayTotal = dayTotal + exp.Amount
+		} else {
+			dayTotal = dayTotal + exchangeCurrency(exp.Amount, exp.Currency, currency, rates)
+		}
+
+	}
+
+	for _, exp := range monthExpense {
+
+		if exp.Currency == currency {
+			monthTotal = monthTotal + exp.Amount
+		} else {
+			monthTotal = monthTotal + exchangeCurrency(exp.Amount, exp.Currency, currency, rates)
+		}
+
+	}
+
+	result := models.DayTotalResulDTO{DayTotal: dayTotal, MonthTotal: monthTotal}
 
 	return &result, nil
 
 }
 
 func (s *ExpensesService) GetMonthExpenses(dto *models.MonthDTO) (*models.MonthExpensesDTO, error) {
-
-	monthTotal, err := s.db.GetMonthTotalExpenses(dto)
+	rates, err := s.common.GetCurrencyRate()
 
 	if err != nil {
 		return nil, err
 	}
+
+	currency := dto.Currency
 
 	expenses, err := s.db.GetMonthExpenses(dto)
 
 	if err != nil {
 		return nil, err
 	}
-	result := models.MonthExpensesDTO{MonthTotal: *monthTotal, Expenses: expenses}
+
+	var monthTotal float64 = 0
+
+	for i, exp := range expenses {
+
+		if exp.Currency == currency {
+			monthTotal = monthTotal + exp.Amount
+		} else {
+			expenseAmount := exchangeCurrency(exp.Amount, exp.Currency, currency, rates)
+			monthTotal = monthTotal + expenseAmount
+
+			expenses[i].Amount = expenseAmount
+		}
+
+	}
+
+	result := models.MonthExpensesDTO{MonthTotal: monthTotal, Expenses: expenses}
 
 	return &result, nil
 
 }
 
-func (s *ExpensesService) GetMonthExpensesByCategory(date time.Time) (*models.MonthExpensesByCategoryDTO, error) {
+func (s *ExpensesService) GetMonthExpensesByCategory(date time.Time, currency models.Currency) (*models.MonthExpensesByCategoryDTO, error) {
 
-	monthTotal, err := s.db.GetMonthTotalExpenses(&models.MonthDTO{Date: date})
+	rates, err := s.common.GetCurrencyRate()
+
+	if err != nil {
+		return nil, err
+	}
+
+	categories := make(map[string]models.MonthCategory)
+
+	expenses, err := s.db.GetMonthExpenses(&models.MonthDTO{Date: date})
 
 	if err != nil {
 		return nil, err
 	}
 
-	categories, err := s.db.GetMonthExpensesByCategory(date)
+	var monthTotal float64 = 0
 
-	if err != nil {
-		return nil, err
+	for _, exp := range expenses {
+
+		val, ok := categories[exp.CategoryID]
+
+		if ok {
+			curAmount := exchangeCurrency(exp.Amount, exp.Currency, currency, rates)
+			val.Amount = val.Amount + curAmount
+			categories[exp.CategoryID] = val
+			monthTotal = monthTotal + curAmount
+		} else {
+			month := models.MonthCategory{}
+
+			month.CategoryID = exp.CategoryID
+			month.CategoryTitle = exp.Category.Title
+			month.Amount = exchangeCurrency(exp.Amount, exp.Currency, currency, rates)
+			monthTotal = monthTotal + month.Amount
+
+			categories[exp.CategoryID] = month
+		}
+
 	}
-	result := models.MonthExpensesByCategoryDTO{MonthTotal: *monthTotal, Categories: categories}
+
+	resultCategories := make([]models.MonthCategory, 0)
+
+	for _, category := range categories {
+		resultCategories = append(resultCategories, category)
+	}
+
+	result := models.MonthExpensesByCategoryDTO{MonthTotal: monthTotal, Categories: resultCategories}
 
 	return &result, nil
+
+}
+
+func (s *ExpensesService) GetCurrencyRate() (*models.CurrencyRate, error) {
+	return s.common.GetCurrencyRate()
+}
+
+func exchangeCurrency(amount float64, currencyIn, currencyOut models.Currency, rates *models.CurrencyRate) float64 {
+
+	if currencyIn == currencyOut {
+		return amount
+	}
+
+	if currencyOut == models.RUB {
+
+		rate := getCurrencyRate(currencyIn, rates)
+		return amount * rate
+	} else if currencyIn == models.RUB {
+		rate := getCurrencyRate(currencyOut, rates)
+		return amount / rate
+
+	} else {
+		rate := getCurrencyRate(currencyIn, rates)
+		secondRate := getCurrencyRate(currencyOut, rates)
+
+		return amount * rate / secondRate
+	}
+
+}
+
+func getCurrencyRate(currency models.Currency, rates *models.CurrencyRate) float64 {
+
+	switch currency {
+	case models.USD:
+		return rates.USD
+	case models.EUR:
+		return rates.EUR
+	case models.TBH:
+		return rates.TBH
+	default:
+		return rates.USD
+	}
 
 }
