@@ -210,3 +210,22 @@ func (h *ExpensesHandlers) GetCurrencyRate(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, *result)
 }
+
+type SyncDTO struct {
+	Expenses []models.ExpenseDTO `json:"expenses"`
+}
+
+func (h *ExpensesHandlers) SyncData(ctx *gin.Context) {
+
+	// userID := ctx.GetString("user")
+
+	var dto SyncDTO
+
+	if err := ctx.ShouldBindJSON(&dto); err != nil {
+		ctx.JSON(http.StatusBadRequest, infrastruct.ErrorBadRequest)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, dto)
+
+}

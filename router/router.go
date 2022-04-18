@@ -29,4 +29,5 @@ func (r *Router) SetupRouter() {
 	r.engine.POST("/expenses/category", r.handlers.AuthGuard(), r.handlers.GetMonthExpensesByCategory)
 	r.engine.GET("/rates", r.handlers.AuthGuard(), r.handlers.GetCurrencyRate)
 
+	r.engine.POST("/sync", r.handlers.AuthGuard(), r.handlers.SyncData)
 }

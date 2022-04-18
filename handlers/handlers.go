@@ -21,6 +21,7 @@ type ExpensesHandlers interface {
 	GetMonthExpensesByCategory(ctx *gin.Context)
 	GetCategoryList(ctx *gin.Context)
 	GetCurrencyRate(ctx *gin.Context)
+	SyncData(ctx *gin.Context)
 }
 
 type Middlewares interface {
