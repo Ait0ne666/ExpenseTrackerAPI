@@ -201,3 +201,36 @@ func (p *ExpensesDAO) GetMonthExpensesByCategory(date time.Time, userID string) 
 	return categories, nil
 
 }
+
+func (p *ExpensesDAO) GetAllExpensesAfter(date *time.Time, userID string) ([]models.Expense, error) {
+
+	expenses := make([]models.Expense, 0)
+
+	args := []interface{}{userID}
+
+	query := "user_id = ? "
+
+	if date != nil {
+		args = []interface{}{userID, date, date, date}
+		query = query + " AND (updated_at> ? OR deleted_at > ? OR created_at > ?)"
+	}
+
+	if err := p.db.Debug().Table("expenses").Preload("Category").Where(query, args...).Find(&expenses).Error; err != nil {
+
+	}
+
+	return expenses, nil
+
+}
+
+func (p *ExpensesDAO) GetExpenseById(userID, expenseID string) (*models.Expense, error) {
+
+	expense := models.Expense{}
+
+	if err := p.db.Debug().Table("expenses").Where("user_id = ? AND id = ?", userID, expenseID).Take(&expense).Error; err != nil {
+		return nil, err
+	}
+
+	return &expense, nil
+
+}

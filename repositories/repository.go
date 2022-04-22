@@ -21,6 +21,8 @@ type ExpensesDAO interface {
 	GetMonthExpensesByCategory(date time.Time, userID string) ([]models.MonthCategory, error)
 	GetCategoryList(query string, userID string) (*[]models.Category, error)
 	GetDayExpenses(date time.Time, userID string) ([]models.Expense, error)
+	GetAllExpensesAfter(date *time.Time, userID string) ([]models.Expense, error)
+	GetExpenseById(userID, expenseID string) (*models.Expense, error)
 }
 
 type CommonDAO interface {

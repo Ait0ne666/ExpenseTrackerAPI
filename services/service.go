@@ -22,6 +22,7 @@ type ExpensesService interface {
 	GetMonthExpensesByCategory(date time.Time, currency models.Currency, userID string) (*models.MonthExpensesByCategoryDTO, error)
 	GetCategoryList(query string, userID string) (*[]models.Category, error)
 	GetCurrencyRate() (*models.CurrencyRate, error)
+	SyncDatabase(syncData models.SyncDTO, userID string) (*models.SyncResultDTO, error)
 }
 
 type CommonService interface {

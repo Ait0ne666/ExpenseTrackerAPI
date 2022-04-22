@@ -269,6 +269,175 @@ func exchangeCurrency(amount float64, currencyIn, currencyOut models.Currency, r
 
 }
 
+func (s *ExpensesService) SyncDatabase(syncData models.SyncDTO, userID string) (*models.SyncResultDTO, error) {
+
+	result := make([]models.ExpenseWithCreatedDTO, 0)
+
+	if syncData.LastSync == nil {
+		expenses, err := s.db.GetAllExpensesAfter(nil, userID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		for _, val := range expenses {
+			expense := models.ExpenseWithCreatedDTO{}
+
+			expense.Amount = val.Amount
+			expense.CategoryID = &val.CategoryID
+			expense.CategoryName = val.Category.Title
+			expense.CloudID = &val.ID
+			expense.Title = val.Title
+			expense.CreatedAt = val.CreatedAt
+			expense.Currency = val.Currency
+			expense.Date = val.Date
+			if val.DeletedAt != nil {
+				expense.DeletedAt = &val.DeletedAt.Time
+			}
+			expense.UpdatedAt = val.UpdatedAt
+
+			result = append(result, expense)
+		}
+
+		return &models.SyncResultDTO{
+			Expenses:       result,
+			UpdatedExpense: make([]models.ExpenseWithCreatedDTO, 0),
+		}, nil
+
+	} else {
+
+		expensesLocal := syncData.Expenses
+
+		for i, exp := range expensesLocal {
+
+			if exp.CloudID == nil {
+
+				createdExp, err := s.CreateExpense(models.ExpenseDTO{
+					Title:        exp.Title,
+					Date:         exp.Date,
+					CategoryName: exp.CategoryName,
+					Amount:       exp.Amount,
+					Currency:     exp.Currency,
+					CategoryID:   exp.CategoryID,
+				}, userID)
+
+				if err != nil {
+					success := false
+					expensesLocal[i].Success = &success
+				} else {
+					success := true
+					expensesLocal[i].Success = &success
+					expensesLocal[i].CloudID = &createdExp.ID
+				}
+
+			} else {
+				existingExp, err := s.db.GetExpenseById(userID, *exp.CloudID)
+
+				if err != nil {
+					success := false
+					expensesLocal[i].Success = &success
+				} else {
+
+					if exp.DeletedAt != nil {
+
+						if existingExp.DeletedAt == nil {
+							err := s.db.DeleteExpense(existingExp.ID, userID)
+							if err != nil {
+								success := false
+								expensesLocal[i].Success = &success
+							} else {
+								success := true
+								expensesLocal[i].Success = &success
+							}
+						} else {
+							success := false
+							expensesLocal[i].Success = &success
+						}
+
+					} else {
+						lastUpdate := exp.UpdatedAt
+
+						if existingExp.UpdatedAt.After(lastUpdate) {
+							success := true
+							expensesLocal[i].Success = &success
+						} else {
+							_, err := s.CreateExpense(models.ExpenseDTO{
+								ID:           exp.CloudID,
+								Title:        exp.Title,
+								Date:         exp.Date,
+								CategoryName: exp.CategoryName,
+								Amount:       exp.Amount,
+								Currency:     exp.Currency,
+								CategoryID:   exp.CategoryID,
+							}, userID)
+
+							if err != nil {
+								success := false
+								expensesLocal[i].Success = &success
+							} else {
+								success := true
+								expensesLocal[i].Success = &success
+							}
+						}
+
+					}
+				}
+
+			}
+
+		}
+
+		expensesToSync, err := s.db.GetAllExpensesAfter(syncData.LastSync, userID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		localExpensesMap := make(map[string]string)
+
+		for _, localExp := range expensesLocal {
+			if localExp.CloudID != nil {
+
+				localExpensesMap[*localExp.CloudID] = *localExp.ID
+			}
+		}
+
+		for _, exp := range expensesToSync {
+
+			expWithCreatedAt := models.ExpenseWithCreatedDTO{}
+
+			id, ok := localExpensesMap[exp.ID]
+
+			if ok {
+				expWithCreatedAt.ID = &id
+			}
+
+			expWithCreatedAt.Amount = exp.Amount
+			expWithCreatedAt.CategoryID = &exp.CategoryID
+			expWithCreatedAt.CategoryName = exp.Category.Title
+			expWithCreatedAt.CloudID = &exp.ID
+			expWithCreatedAt.CreatedAt = exp.CreatedAt
+			if exp.DeletedAt != nil {
+				expWithCreatedAt.DeletedAt = &exp.DeletedAt.Time
+			}
+
+			expWithCreatedAt.Currency = exp.Currency
+			expWithCreatedAt.Date = exp.Date
+			expWithCreatedAt.Title = exp.Title
+			expWithCreatedAt.UpdatedAt = exp.UpdatedAt
+
+			result = append(result, expWithCreatedAt)
+
+		}
+
+		return &models.SyncResultDTO{
+			Expenses:       result,
+			UpdatedExpense: expensesLocal,
+		}, nil
+	}
+
+}
+
 func getCurrencyRate(currency models.Currency, rates *models.CurrencyRate) float64 {
 
 	switch currency {
