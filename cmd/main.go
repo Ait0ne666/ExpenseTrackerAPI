@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	initEnv()
+	// initEnv()
 	r := gin.Default()
 
 	database, err := db.ConnectDatabase()
