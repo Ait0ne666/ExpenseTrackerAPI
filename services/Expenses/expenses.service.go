@@ -308,6 +308,7 @@ func (s *ExpensesService) SyncDatabase(syncData models.SyncDTO, userID string) (
 		return &models.SyncResultDTO{
 			Expenses:       result,
 			UpdatedExpense: make([]models.ExpenseWithCreatedDTO, 0),
+			Rates:          rates,
 		}, nil
 
 	} else {
@@ -439,7 +440,7 @@ func (s *ExpensesService) SyncDatabase(syncData models.SyncDTO, userID string) (
 		return &models.SyncResultDTO{
 			Expenses:       result,
 			UpdatedExpense: expensesLocal,
-			Rates:          *rates,
+			Rates:          rates,
 		}, nil
 	}
 

@@ -119,5 +119,5 @@ type SyncDTO struct {
 type SyncResultDTO struct {
 	Expenses       []ExpenseWithCreatedDTO `json:"expenses"`
 	UpdatedExpense []ExpenseWithCreatedDTO `json:"updated_expenses"`
-	Rates          CurrencyRate            `json:"rates"`
+	Rates          *CurrencyRate           `json:"rates"`
 }
