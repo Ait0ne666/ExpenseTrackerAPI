@@ -273,6 +273,12 @@ func (s *ExpensesService) SyncDatabase(syncData models.SyncDTO, userID string) (
 
 	result := make([]models.ExpenseWithCreatedDTO, 0)
 
+	rates, err := s.common.GetCurrencyRate()
+
+	if err != nil {
+		return nil, err
+	}
+
 	if syncData.LastSync == nil {
 		expenses, err := s.db.GetAllExpensesAfter(nil, userID)
 
@@ -433,6 +439,7 @@ func (s *ExpensesService) SyncDatabase(syncData models.SyncDTO, userID string) (
 		return &models.SyncResultDTO{
 			Expenses:       result,
 			UpdatedExpense: expensesLocal,
+			Rates:          *rates,
 		}, nil
 	}
 
