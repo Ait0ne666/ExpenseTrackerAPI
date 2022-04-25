@@ -400,7 +400,7 @@ func (s *ExpensesService) SyncDatabase(syncData models.SyncDTO, userID string) (
 			return nil, err
 		}
 
-		localExpensesMap := make(map[string]string)
+		localExpensesMap := make(map[string]int)
 
 		for _, localExp := range expensesLocal {
 			if localExp.CloudID != nil {

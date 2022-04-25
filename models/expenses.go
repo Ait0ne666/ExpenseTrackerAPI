@@ -49,7 +49,7 @@ type ExpenseDTO struct {
 }
 
 type ExpenseWithCreatedDTO struct {
-	ID           *string    `json:"id"`
+	ID           *int       `json:"id"`
 	CloudID      *string    `json:"cloud_id"`
 	Title        *string    `json:"title"`
 	Date         time.Time  `json:"date"`
