@@ -218,6 +218,7 @@ func (h *ExpensesHandlers) SyncData(ctx *gin.Context) {
 	var dto models.SyncDTO
 
 	if err := ctx.ShouldBindJSON(&dto); err != nil {
+		println(err.Error())
 		ctx.JSON(http.StatusBadRequest, infrastruct.ErrorBadRequest)
 		return
 	}
@@ -225,6 +226,7 @@ func (h *ExpensesHandlers) SyncData(ctx *gin.Context) {
 	result, err := h.s.SyncDatabase(dto, userID)
 
 	if err != nil {
+		println(err.Error())
 		ctx.JSON(http.StatusBadRequest, infrastruct.ErrorInternalServerError)
 		return
 	}
