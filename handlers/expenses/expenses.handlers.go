@@ -4,6 +4,7 @@ import (
 	"expense_tracker/models"
 	"expense_tracker/pkg/infrastruct"
 	services "expense_tracker/services"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -216,6 +217,9 @@ func (h *ExpensesHandlers) SyncData(ctx *gin.Context) {
 	userID := ctx.GetString("user")
 
 	var dto models.SyncDTO
+
+	body, _ := ioutil.ReadAll(ctx.Request.Body)
+	println(string(body))
 
 	if err := ctx.ShouldBindJSON(&dto); err != nil {
 		println(err.Error())
