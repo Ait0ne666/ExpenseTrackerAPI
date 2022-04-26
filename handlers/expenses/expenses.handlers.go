@@ -222,7 +222,6 @@ func (h *ExpensesHandlers) SyncData(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, infrastruct.ErrorBadRequest)
 		return
 	}
-	println(dto.LastSync)
 
 	result, err := h.s.SyncDatabase(dto, userID)
 
