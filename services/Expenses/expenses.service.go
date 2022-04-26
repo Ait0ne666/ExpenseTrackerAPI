@@ -406,6 +406,8 @@ func (s *ExpensesService) SyncDatabase(syncData models.SyncDTO, userID string) (
 			if localExp.CloudID != nil {
 
 				localExpensesMap[*localExp.CloudID] = *localExp.ID
+			} else {
+				print("no id found")
 			}
 		}
 
@@ -436,6 +438,8 @@ func (s *ExpensesService) SyncDatabase(syncData models.SyncDTO, userID string) (
 			result = append(result, expWithCreatedAt)
 
 		}
+
+		print(result)
 
 		return &models.SyncResultDTO{
 			Expenses:       result,

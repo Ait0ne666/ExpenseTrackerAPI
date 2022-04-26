@@ -212,11 +212,11 @@ func (p *ExpensesDAO) GetAllExpensesAfter(date *time.Time, userID string) ([]mod
 
 	if date != nil {
 		args = []interface{}{userID, date, date, date}
-		query = query + " AND (updated_at> ? OR deleted_at > ? OR created_at > ?)"
+		query = query + " AND (updated_at>= ? OR deleted_at >= ? OR created_at >= ?)"
 	}
 
 	if err := p.db.Debug().Table("expenses").Preload("Category").Where(query, args...).Find(&expenses).Error; err != nil {
-
+		return expenses, err
 	}
 
 	return expenses, nil
