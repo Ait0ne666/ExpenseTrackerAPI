@@ -357,7 +357,8 @@ func (s *ExpensesService) SyncDatabase(syncData models.SyncDTO, userID string) (
 								expensesLocal[i].Success = &success
 							}
 						} else {
-							success := false
+							success := true
+							result = append(result, expensesLocal[i])
 							expensesLocal[i].Success = &success
 						}
 

@@ -215,7 +215,7 @@ func (p *ExpensesDAO) GetAllExpensesAfter(date *time.Time, userID string) ([]mod
 		query = query + " AND (updated_at>= ? OR deleted_at >= ? OR created_at >= ?)"
 	}
 
-	if err := p.db.Debug().Table("expenses").Preload("Category").Where(query, args...).Find(&expenses).Error; err != nil {
+	if err := p.db.Debug().Unscoped().Table("expenses").Preload("Category").Where(query, args...).Find(&expenses).Error; err != nil {
 		return expenses, err
 	}
 
@@ -227,7 +227,7 @@ func (p *ExpensesDAO) GetExpenseById(userID, expenseID string) (*models.Expense,
 
 	expense := models.Expense{}
 
-	if err := p.db.Debug().Table("expenses").Where("user_id = ? AND id = ?", userID, expenseID).Take(&expense).Error; err != nil {
+	if err := p.db.Debug().Unscoped().Table("expenses").Where("user_id = ? AND id = ?", userID, expenseID).Take(&expense).Error; err != nil {
 		return nil, err
 	}
 
