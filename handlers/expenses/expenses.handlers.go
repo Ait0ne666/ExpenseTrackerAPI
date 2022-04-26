@@ -4,7 +4,6 @@ import (
 	"expense_tracker/models"
 	"expense_tracker/pkg/infrastruct"
 	services "expense_tracker/services"
-	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -218,14 +217,12 @@ func (h *ExpensesHandlers) SyncData(ctx *gin.Context) {
 
 	var dto models.SyncDTO
 
-	body, _ := ioutil.ReadAll(ctx.Request.Body)
-	println(string(body))
-
 	if err := ctx.ShouldBindJSON(&dto); err != nil {
 		println(err.Error())
 		ctx.JSON(http.StatusBadRequest, infrastruct.ErrorBadRequest)
 		return
 	}
+	println(dto.LastSync)
 
 	result, err := h.s.SyncDatabase(dto, userID)
 
